@@ -1,5 +1,6 @@
 import { CONFIG } from './config';
 import { GameRuleError } from './errors';
+import { activeQuests } from './selectors';
 import type { GameEvent, GameState, ISODate, LeadAction, Quest, WeekKey } from './types';
 import { isSameLocalDay, weekKey } from './weeks';
 
@@ -89,8 +90,6 @@ function applyOptional<K extends 'deadline' | 'notes'>(target: Quest, patch: Upd
   if (value) target[key] = value;
   else delete target[key];
 }
-
-export const activeQuests = (state: GameState): Quest[] => state.quests.filter((q) => q.status === 'active');
 
 // ---------- actions ----------
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSameLocalDay, weekKey } from '../src/engine/weeks';
+import { daysUntil, endOfLocalDay, isSameLocalDay, localDate, weekKey } from '../src/engine/weeks';
 import { at } from './helpers';
 
 describe('weekKey (ISO week, Europe/Zurich)', () => {
@@ -31,5 +31,28 @@ describe('isSameLocalDay', () => {
     expect(isSameLocalDay(at('2026-11-24T00:00:00Z'), at('2026-11-24T22:59:00Z'))).toBe(true);
     expect(isSameLocalDay(at('2026-11-24T22:59:00Z'), at('2026-11-24T23:00:00Z'))).toBe(false);
     expect(isSameLocalDay(at('2026-11-23T23:00:00Z'), at('2026-11-24T10:00:00Z'))).toBe(true);
+  });
+});
+
+describe('local dates for deadlines', () => {
+  it('turns a calendar date into the end of that day in Zurich', () => {
+    expect(endOfLocalDay('2026-12-31')).toBe('2026-12-31T22:59:59.999Z');
+    expect(endOfLocalDay('2026-07-01')).toBe('2026-07-01T21:59:59.999Z');
+  });
+
+  it('formats an instant as the Zurich calendar date', () => {
+    expect(localDate('2026-12-31T22:59:59.999Z')).toBe('2026-12-31');
+    expect(localDate('2026-11-24T23:30:00Z')).toBe('2026-11-25');
+  });
+
+  it('round-trips', () => {
+    expect(localDate(endOfLocalDay('2027-03-28'))).toBe('2027-03-28');
+  });
+
+  it('counts whole days left until a deadline', () => {
+    const deadline = endOfLocalDay('2026-11-27');
+    expect(daysUntil(deadline, at('2026-11-24T09:00:00Z'))).toBe(3);
+    expect(daysUntil(deadline, at('2026-11-27T20:00:00Z'))).toBe(0);
+    expect(daysUntil(deadline, at('2026-11-29T09:00:00Z'))).toBe(-2);
   });
 });
